@@ -1,43 +1,26 @@
-Hi James,
-
-I heard you had a great phone interview! As a part our screening process, we administer a take home programming question. Things to keep in mind before submitting your response:
-
-1. Please take your time and respond to the question.
-
 2. Choose any language you are comfortable with. 
 
 3. Please provide steps to run the program.
 
 4. Think about the design/structure/testability of the program. 
+since we may be using this function on larger files I opted to use threads.
+Threads instead of processes to allow for shared memory address between threads
+so we can do aggregate functions like `count` if we need in the future.
 
-5. Please sign and return our application and NDA with your response. You will receive a separate email from DocuSign with these documents.
-
-Once your response has been submitted, the team will review it and I will get back to you regarding next steps. 
-
-We're always available if you have questions, so if you have any please send us a note. 
-
-Please reply stating that you have received this email. 
-
-Best,
-
-Taylor 
-
-
-
-
-cat /proc/cpuinfo | grep processor | wc -l
-
-require 'parallel'
-require 'benchmark'
-mutex = Mutex.new
-
-add numbres to file
+created a large file to test
 ```
   $ ruby -e '(1..100000).each { |i| puts "This is line number #{i}"}' > large_file.txt
 ```
 
+tuned thread count by:
+TODO: add
+
 proof of concept
 ```
+  require 'parallel'
+  require 'benchmark'
+  mutex = Mutex.new
+
   count = 0
   puts Benchmark.measure {
     Parallel.each(
@@ -57,11 +40,16 @@ proof of concept
   p count
 ```
 
+
+
 ## Results
 Need to run with threads for shared memory address (find correct term).
 We can parralelize operations with processes but didn't want to deal with the hassle of <TODO: how to 
 communicate between processes? find terminology>
+  see here
+  https://www.backblaze.com/blog/whats-the-diff-programs-processes-and-threads/
 
+cat /proc/cpuinfo | grep processor | wc -l
 
 MRI (C-Ruby)
 17 sec
@@ -82,3 +70,15 @@ Just for curiosity I tried running this with processes
 # 1 - 18 s
 # 4 - 6 sec
 ```
+
+
+reduced the scope of the problem by asserting basic assumptions with `LineReaderExceptions::BracketError`.
+
+wrote tests for non-printable lines
+
+spot checked printed and non-printed
+uxpvoytxfazjjhi[qogwhtzmwxvjwxreuz]zduoybbzxigwggwu[lamifchqqwbphhsqnf]qrjdjwtnhsjqftnqsk[bsqinwypsnnvougrs]wfmhtjkysqffllakru
+
+
+
+

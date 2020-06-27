@@ -1,4 +1,6 @@
-require_relative 'line_reader.rb'
+require_relative 'line_reader'
+
+require 'minitest/autorun'
 
 describe 'foo' do
   describe '#check_for_bracket_errors' do

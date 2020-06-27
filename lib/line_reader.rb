@@ -1,7 +1,3 @@
-require 'parallel'
-require 'minitest/autorun'
-require 'pry'
-
 module LineReaderExceptions
   class BracketError < StandardError
     def initialize(message = 'Invalid bracket parens')
