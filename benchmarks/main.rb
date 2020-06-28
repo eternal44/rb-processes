@@ -24,7 +24,3 @@ Benchmark.bm(9) do |x|
   end
 end
 
-# NOTE:
-# I decided to abandon memory profiling benchmarks for the sake of time.
-# Additionally, Ruby's File.open function doesn't load the entire file into
-# memory before reading so I figured we should be okay here.

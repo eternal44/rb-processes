@@ -30,7 +30,8 @@ Golang seemed like a natural choice because of it's `channel` feature but I
 ultimately decided against it. As per the job description: 
 
 ```
-  We are an engineering driven company, operating one of the world’s largest Ruby-based platform
+  We are an engineering driven company, operating one of the world’s largest
+  Ruby-based platform
 ```
 
 It looked like there'd be a high probability I'd be working with Ruby so I
@@ -45,8 +46,8 @@ to:
 - print values instead of returning them
 
 Maybe it's intended use would be to pipe the STDOUT into another executable
-command? Either way, adapting this API to whatever else we might need seemed
-straight forward enough.
+command? Either way, rewriting the API to fit whatever other usecase should
+not be a problem due to it's structure.
 
 
 # Structure
@@ -64,7 +65,7 @@ Here are the main parts of the script:
 # Testability
 ### Strategies
 Another intuitive reason to structure the script in composable parts is to
-simplify testing for the following reasons:
+simplify testing it's different parts:
 - writing unit tests for the single line validation function is intuitive
 - the `File.open` function I'm using is a Kernel function so I opted not to test it
 - handling CLI inputs can be easily tested manually
@@ -82,64 +83,128 @@ and implemented a validation layer to detect any unexpected bracket
 patterns in a line. Please see the `#check_for_bracket_errors` in the
 [lib/line_reader.rb(./lib/line_reader.rb)] file for reference.
 
+
 ### Performance
 The more difficult requirement to test was the script's ability to scan larger
-files. I ran some basic benchmarks to confirm the script worked under load.
-Here are the results:
+files. I knew Ruby's `File.open` function would be able to handle files of any size
+but I got curious about optimizing it's performance.  I ran some basic
+benchmarks to confirm the script worked under load with 2 different Ruby
+engines:
 
+MRI - to simulate the most probable selection in production
+Jruby - to explore the advantages of using threaded processes
 
-Input file:
-Note: you'll have to generate the input file. Please see the
-[benchmark(#benchmark)] section for instructions.
+Read on to see the preliminary results I found.
+
+#### Laptop specs:
+```
+Ubuntu 18.04.4
+8 gb memory
+Intel i7-8565U CPU @ 1.80GHz (8 cores)
+```
+
+#### Input file
+We'll need a larger file to run these benchmarks on. I generated these files
+with a basic script that appended the `large-sample-data.txt` file to another
+file `n` number of times. Please see the [benchmark(#benchmark)] section for
+usage instructions.
+
+#### Benchmark #1
+NOTE: The `real` column below represents the script's run time in seconds.
+
 ```
   $ du -h ./input-files/benchmark-input.txt
 
   482M    ./input-files/benchmark-input.txt
 ```
 
-Runtime stats:
-The `real` column represents the execution time in seconds.
-
-Jruby (v9.2.9):
+Jruby (v9.2.9)run time:
 ```
                   user     system      total        real
   1 thread  422.850000   2.050000 424.900000 (151.946170)
   6 threads 470.680000   1.770000 472.450000 ( 62.124985)
 ```
 
-MRI (v2.6.5):
+MRI (v2.6.5)run time:
 ```
                  user     system      total        real
   1 thread 242.121877   0.278335 242.400212 (242.406126)
 ```
 
+#### Benchmark #2
+
+```
+  $ du -h ./input-files/benchmark-input.txt
+
+  964M    ./input-files/benchmark-input.txt
+```
+
+MRI (v2.6.5)run time:
+```
+  $ ruby ./benchmarks/main.rb
+
+                  user     system      total        real
+  1 thread  479.971765   0.671950 480.643715 (480.834031)
+
+```
+
+Jruby (v9.2.9)run time:
+```
+  $ ruby -J-Xmx3000M ./benchmarks/main.rb
+
+                  user     system      total        real
+  1 thread  1029.900000   4.970000 1034.870000 (353.052178)
+  6 threads 1072.650000   3.350000 1076.000000 (139.380866)
+```
+
+#### Results
+As expected, a multi-threaded approach will yield faster runtimes but at the
+cost of more compute resources. You'll also notice I needed to increase the
+memory cap for Jruby on the ~1gb benchmark due to it's default memory cap of
+1904MB.
+
+There are a few more interesting observations I made from these benchmarks but
+for the sake of brevity I'll forego doing so here. For additional benchmark
+metrics please see the [`htop` screenshots](./benchmarks/screenshots/).
+
 
 # Usage
-Run the following commands from the project root directory.
+Run the following commands from the project root directory. If you're using
+Jruby and encounter this error message:
 
-## Running The Script
+```
+  Error: Your application used more memory than the automatic cap of 1904MB.
+  Specify -J-Xmx####M to increase it (#### = cap size in MB).
+```
+
+You can temporarily increase that memory cap with the suggested flag from that
+error message:
+```
+  $ ruby -J-Xmx3000M main.rb -t 6 -f <YOUR FILE PATH>
+```
+
+
+### Running The Script
 ```
   $ ruby main.rb -f input-files/large-sample-data.txt
 ```
 
-If you'd like to run the script with extra threads pass in a desired threat
-count with the `-t` flag:
+Use the `-t` flag to run the script with more threads:
 ```
   $ ruby main.rb -t 6 -f input-files/large-sample-data.txt
 ```
 
-Be sure to use a Ruby engine such as `Jruby` to take full advantage of multiple threads.
 
-
-## Running Unit Tests
+### Running Unit Tests
 ```
   $ ruby lib/line_reader_tests.rb
 ```
 
-## Benchmarks
+
+### Benchmarks
 Create an input file to use for benchmarking:
 ```
-  $ ./benchmarks/create_input_file.sh <DESIRED FILE SIZE IN MEGABYTES
+  $ ./benchmarks/create_input_file.sh <DESIRED FILE SIZE IN MEGABYTES>
 ```
 
 Then run the benchmark tests with the following:
