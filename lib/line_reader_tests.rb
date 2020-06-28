@@ -2,7 +2,7 @@ require_relative 'line_reader'
 
 require 'minitest/autorun'
 
-describe 'foo' do
+describe '#main' do
   describe '#check_for_bracket_errors' do
     describe 'raises exception when' do
       it 'brackets contain less than 4 characters' do
