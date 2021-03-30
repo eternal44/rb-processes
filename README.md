@@ -1,10 +1,7 @@
 # Prompt
 I'm adding portions of the prompt here for easy reference.
 ```
-  You have been provided a file with a list of strings. Each string is on a new line.
-  The size of the file could be anywhere between 5MB - 1000MB.
-
-  Write a program/script to count and print lines which have the following pattern
+  Count and print lines which have the following pattern:
 
   Any 4 char sequence which has a pair of two different characters followed by the reverse of that pair
   e.g xaax or raar. The string is not considered valid if the pattern above exist in square brackets.
@@ -15,12 +12,6 @@ I'm adding portions of the prompt here for easy reference.
   efgh[baab]ommo this is invalid (baab is within brackets, ommo outside brackets).
   bbbb[qwer]ereq this is invalid (bbbb is invalid, since the middle two characters should be different.
   irttrj[asdfgh]zxcvbn this is valid (rttr is outside square brackets).
-
-  2. Choose any language you are comfortable with. 
-
-  3. Please provide steps to run the program.
-
-  4. Think about the design/structure/testability of the program. 
 ```
 
 
